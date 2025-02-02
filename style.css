@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Prompt", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+
+.container {
+    max-width: 1980px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* ส่วนของ header */
+.box_head {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 10px;
+    border-bottom: 1px solid #ddd;
+    background: #F17629;
+    border-radius: 15px 15px 0 0;
+}
+
+.box_head a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.box_head a:hover {
+    text-decoration: underline;
+}
+
+/* ส่วนของโลโก้และเมนูหลัก */
+.box_logo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 5px solid #F17629;
+}
+
+.box_logo img {
+    height: 50px;
+}
+
+/* ปรับเมนูหลักให้อยู่ใกล้กันและชิดมุมขวา */
+.box_logo nav {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* ชิดมุมขวา */
+}
+
+.box_logo nav a {
+    position: relative;
+    margin-left: 15px; /* ระยะห่างระหว่างลิงก์ */
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    padding: 5px 0;
+}
+
+.box_logo nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    display: block;
+    margin-top: 5px;
+    right: 0;
+    background: #F17629;
+    transition: width 0.3s ease;
+}
+
+.box_logo nav a:hover::after {
+    width: 100%;
+    left: 0;
+    background: #F17629;
+}
+
+.box_logo nav a:hover {
+    color: #F17629;
+}
+
+/* ส่วนของเมนูรอง */
+.box_menu {
+    display: flex;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    border-radius: 15px;
+    
+}
+
+.box_menu img {
+    width: 75%;
+    height: auto;
+    justify-content: center;
+    border-top: 10px solid #fff;
+}
+
+.box_menu nav {
+    position: absolute;
+    width: 65%;
+    bottom: 0;
+    transform: translateY(50%);
+    display: flex;
+    justify-content: center;
+    gap: 0; /* เพิ่มระยะห่างระหว่างลิงก์ */
+    border-radius: 10px;
+    background-image: linear-gradient(90deg, rgba(241, 118, 41, 1) 0%, rgba(226, 18, 18, 0.65) 100%);
+    
+}
+
+.box_menu a {
+    position: relative;
+    border-bottom: none;
+    left: unset;
+    right: 0;
+    width: 100%;
+    display: inline-block;
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    padding: 10px 10px; /* เพิ่ม padding ให้ใหญ่ขึ้น */
+}
+
+
+
+.box_menu a:hover {
+    background-image: linear-gradient(90deg, rgba(241, 118, 41, 1) 0%, rgba(226, 18, 18, 1) 100%);
+    transition: background 0.5s ease, transform 0.5s ease;
+    border-radius: 10px;
+}
+
+
+
+.selection {
+    margin: 40px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    column-gap: 3rem;
+}
+
+.box-face {
+    width: 268px;
+    height: 344px;
+    margin: 20px 0;
+    border-radius: 15px;
+    background: #fff;
+    border-top: 30px solid #F17629;
+    box-shadow: 6px 3px 11px 5px rgba(0, 0, 0, 0.1);
+}
+
+.selection img {
+    width: 100%;
+}
+
+
+.box-text {
+    margin: 2rem 0;
+}
+
+.box-face p {
+    margin: 10px 10px;
+    color: #333;
+}
+.box-face a {
+    color: #333;
+    font-weight: 600;
+    text-decoration: none;
+    margin: 10px 10px;
+}
+
+
+

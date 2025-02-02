@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>กองทุน</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+</head>
+<body>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <div class="container">
+        <nav class="header">
+            <img src="{{ url_for('static', filename='logo (1).png') }}" alt="">
+            <h1>เข้าสู่ระบบ</h1>
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="input-box">
+                    <label for="c_id"></label>
+                    <input type="text" name="c_id" placeholder="เลขบัตรประจำตัวประชาชน" required>
+                </div>
+
+                <div class="input-box">
+                    <label for="c_password"></label>
+                    <input type="password" name="c_password" placeholder="รหัสผ่าน" required>
+                </div>
+
+                <button type="submit" class="btn">เข้าสู่ระบบ</button>
+            </form>
+
+            <div class="remember-forgot">
+                <label><input type="checkbox">จดจำฉันไว้</label>
+                <a href="#">ลืมรหัสผ่าน</a>
+            </div>
+
+            <div class="register-link">
+                <p>ยังไม่มีชื่อผู้ใช้งาน
+                    <a href="{{ url_for('register') }}">ลงทะเบียนขอสิทธิ์เข้าใช้งาน</a>
+                </p>
+            </div>
+
+            <div class="register-link-2">
+                <a href="#">เข้าสู่ระบบสำหรับเจ้าหน้าที่</a>
+            </div>
+        </nav>
+        <div class="box-black"></div>
+    </div>
+</body>
+</html>

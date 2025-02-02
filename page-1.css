@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Prompt", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+.container {
+    max-width: 1980px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.box-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.box-logo img {
+    height: 60px;
+}
+
+form input[placeholder="ค้นหา..."]{
+    color: #F17629;
+}
+
+form input[type="text"] {
+    border: 1px solid #F17629;
+    height: 40px;
+    width: 300px;
+    border-radius: 40px;
+    padding: 0 10px;
+}
+
+form input:hover {
+    border: 1px solid #F17629;
+}
+
+form input:hover::after {
+    background: #F17629;
+}
+
+form button {
+    border: none;
+    padding: 0.5rem;
+    background: none;
+    margin-left: -40px;
+    color: #F17629;
+}
+
+form button:hover {
+    color: blue;
+}
+
+
+.box-menu {
+    background: linear-gradient(90deg, rgba(241, 118, 41, 1) 0%, rgba(249, 26, 26, 1) 100%);;
+    height: 41px;
+    margin: 20px 0;
+    display: flex;
+    justify-content: space-evenly; /* จัดให้อยู่กึ่งกลาง */ 
+    align-items: center;
+    list-style-type: none;
+}
+
+.box-menu li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.box-menu li i {
+
+    color: #fff;
+    width: 100%;
+
+}
+
+.box-menu i {
+    margin-right: 5px;
+  }
+
+
+.box-menu a {
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: transparent;
+    transition: color 0.3s, background-color 0.3s;
+  }
+  
+.box-menu a:hover {
+    color: #F17629;
+    background-color: white;
+  }
+  
+
+
+ 
+
+  
+
+@media screen and (max-width: 600px) {
+    .box-menu {
+        flex-direction: column;
+        height: auto;
+        padding: 1rem 0;
+        width: 100%;
+        
+    }
+
+    .box-menu a {
+        margin: 1rem 0;
+        margin-left: 20px;
+        width: 100%;
+        border-bottom: 1px solid #fff;
+       
+    }
+}
