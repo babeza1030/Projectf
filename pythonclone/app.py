@@ -1,12 +1,19 @@
 import hashlib
 from flask import Flask, render_template, request, session, redirect, url_for, flash
-import mysql.connector
-from mysql.connector import Error
 import pymysql
-import pymysql.cursors
-app = Flask(__name__)
+from pymysql import Error
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
-# Configure the database connection
+# Initialize Flask app
+app = Flask(__name__)
+app.config.from_pyfile("config.py")
+app.secret_key = "your_secret_key_here"  # ตั้งค่า secret key สำหรับ session
+
+# Initialize Database
+db = SQLAlchemy(app)
+
+# Function to establish MySQL connection using PyMySQL
 def get_mysql_connection():
     try:
         return pymysql.connect(
@@ -20,39 +27,48 @@ def get_mysql_connection():
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None
-#admin
 
+
+# 🔹 ตรวจสอบการเชื่อมต่อฐานข้อมูล
+@app.route("/check_db")
+def check_db():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return "Database Connected Successfully!"
+    except Exception as e:
+        return f"Database Connection Failed: {str(e)}"
+
+
+# 🔹 หน้า Login ของ Admin
 @app.route("/adminlogin", methods=["GET", "POST"])
 def adminlogin():
     if request.method == "POST":
-        # รับค่าจากฟอร์ม
         username = request.form["username"]
         password = request.form["password"]
 
-        # ตรวจสอบ username และ password (ในที่นี้ใช้ค่าตัวอย่าง)
         if username == "admin" and password == "password123":
             return redirect(url_for("admin_dashboard"))
         else:
-            return "Invalid username or password. Please try again."
+            flash("Invalid username or password.", "error")
 
     return render_template("adminlogin.html")
 
-# หน้า Admin Dashboard (หลังจาก login สำเร็จ)
+
+# 🔹 หน้า Dashboard Admin
 @app.route("/dashboard")
 def admin_dashboard():
     return "Welcome to the Admin Dashboard!"
 
 
-
+# 🔹 Admin Register
 @app.route("/adminregister", methods=["GET", "POST"])
 def adminregister():
     errors = []
 
-    if request.method == 'POST':
-        u_id = request.form['username']
-        p_id = request.form['password']
+    if request.method == "POST":
+        u_id = request.form["username"]
+        p_id = request.form["password"]
 
-        # Validate input
         if not u_id:
             errors.append("Username is required")
         if not p_id:
@@ -60,164 +76,127 @@ def adminregister():
 
         if not errors:
             conn = get_mysql_connection()
-            if not conn:
-                errors.append("Database connection error")
-            else:
+            if conn:
                 try:
                     cursor = conn.cursor()
 
-                    # Check if user already exists
-                    query = "SELECT * FROM user WHERE u_id = %s"
-                    cursor.execute(query, (u_id,))  # ✅ Corrected tuple syntax
+                    # ตรวจสอบว่าผู้ใช้มีอยู่แล้วหรือไม่
+                    cursor.execute("SELECT * FROM reg_user WHERE u_id = %s", (u_id,))
                     user = cursor.fetchone()
 
                     if user:
                         errors.append("Username already exists")
-
-                    # Register new user if no errors
-                    if not errors:
+                    else:
                         hashed_password = hashlib.md5(p_id.encode()).hexdigest()
-                        insert_query = """
-                            INSERT INTO reg_user (u_id, p_id)
-                            VALUES (%s, %s)
-                        """
-                        cursor.execute(insert_query, (u_id, hashed_password))  # ✅ Corrected hashed password
+                        cursor.execute("INSERT INTO reg_user (u_id, p_id) VALUES (%s, %s)", (u_id, hashed_password))
                         conn.commit()
 
-                        # Store user in session and redirect
-                        session['username'] = u_id
-                        session['success'] = "You are now logged in"
-                        return redirect('/')
+                        session["username"] = u_id
+                        session["success"] = "You are now logged in"
+                        return redirect("/")
 
-                except pymysql.Error as e:  # ✅ Fixed Error handling
+                except pymysql.Error as e:
                     errors.append(f"Database error: {e}")
                 finally:
                     cursor.close()
                     conn.close()
 
-    return render_template('adminregister.html', errors=errors)
+    return render_template("adminregister.html", errors=errors)
 
 
-
-
-
-
-
-@app.route('/login', methods=['GET', 'POST'])
+# 🔹 User Login
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        c_id = request.form['c_id']
-        c_password = request.form['c_password']
+    if request.method == "POST":
+        c_id = request.form["c_id"]
+        c_password = request.form["c_password"]
 
-        # Connect to the database
         conn = get_mysql_connection()
-        if not conn:
-            flash('Unable to connect to the database.', 'error')
-            return render_template('login.html')
+        if conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM reg_user WHERE c_id = %s AND c_password = %s", (c_id, c_password))
+                user = cursor.fetchone()
 
-        try:
-            cursor = conn.cursor(dictionary=True)  # Use dictionary cursor to access rows as dicts
-
-            # Query to check the user
-            query = "SELECT * FROM reg_user WHERE c_id = %s AND c_password = %s"
-            cursor.execute(query, (c_id, c_password))
-            user = cursor.fetchone()
-
-            if user:
-                # Store user details in session
-                session['c_id'] = user['c_id']
-                session['c_name'] = user['c_name']
-                session['c_sername'] = user['c_sername']
-                return redirect(url_for('index'))
-            else:
-                flash('Invalid account ID or password.', 'error')
-        except Error as err:
-            flash(f"Database error: {err}", 'error')
-        finally:
-            if conn.is_connected():
+                if user:
+                    session["c_id"] = user["c_id"]
+                    session["c_name"] = user["c_name"]
+                    session["c_sername"] = user["c_sername"]
+                    return redirect(url_for("index"))
+                else:
+                    flash("Invalid account ID or password.", "error")
+            except Error as err:
+                flash(f"Database error: {err}", "error")
+            finally:
                 cursor.close()
                 conn.close()
 
-    return render_template('login.html')
+    return render_template("login.html")
 
-@app.route('/register', methods=['GET', 'POST'])
+
+# 🔹 User Register
+@app.route("/register", methods=["GET", "POST"])
 def register():
     errors = []
 
-    if request.method == 'POST':
-        c_name = request.form['c_name']
-        c_sername = request.form['c_sername']
-        c_id = request.form['c_id']
-        c_number = request.form['c_number']
-        c_password = request.form['c_password']
+    if request.method == "POST":
+        c_name = request.form["c_name"]
+        c_sername = request.form["c_sername"]
+        c_id = request.form["c_id"]
+        c_number = request.form["c_number"]
+        c_password = request.form["c_password"]
 
-        # Validate input
-        if not c_name:
-            errors.append("First name is required")
-        if not c_sername:
-            errors.append("Last name is required")
-        if not c_id:
-            errors.append("ID is required")
-        if not c_number:
-            errors.append("Phone number is required")
-        if not c_password:
-            errors.append("Password is required")
+        if not all([c_name, c_sername, c_id, c_number, c_password]):
+            errors.append("All fields are required")
 
         if not errors:
             conn = get_mysql_connection()
-            if not conn:
-                errors.append("Database connection error")
-            else:
+            if conn:
                 try:
-                    cursor = conn.cursor(dictionary=True)
-                
-                    # Check if user already exists
-                    query = "SELECT * FROM reg_user WHERE c_name = %s OR c_id = %s"
-                    cursor.execute(query, (c_name, c_id))
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT * FROM reg_user WHERE c_name = %s OR c_id = %s", (c_name, c_id))
                     user = cursor.fetchone()
 
                     if user:
-                        if user['c_name'] == c_name:
-                            errors.append("Username already exists")
-                        if user['c_id'] == c_id:
-                            errors.append("ID already exists")
-
-                    # Register new user if no errors
-                    if not errors:
+                        errors.append("Username or ID already exists")
+                    else:
                         hashed_password = hashlib.md5(c_password.encode()).hexdigest()
-                        insert_query = """
-                            INSERT INTO reg_user (c_name, c_sername, c_id, c_number, c_password)
-                            VALUES (%s, %s, %s, %s, %s)
-                        """
-                        cursor.execute(insert_query, (c_name, c_sername, c_id, c_number, hashed_password))
+                        cursor.execute(
+                            "INSERT INTO reg_user (c_name, c_sername, c_id, c_number, c_password) VALUES (%s, %s, %s, %s, %s)",
+                            (c_name, c_sername, c_id, c_number, hashed_password),
+                        )
                         conn.commit()
 
-                        # Store user in session and redirect
-                        session['username'] = c_name
-                        session['success'] = "You are now logged in"
-                        return redirect('/')
+                        session["username"] = c_name
+                        session["success"] = "You are now logged in"
+                        return redirect("/")
 
                 except Error as e:
                     errors.append(f"Database error: {e}")
                 finally:
-                    if conn.is_connected():
-                        cursor.close()
-                        conn.close()
+                    cursor.close()
+                    conn.close()
 
-    return render_template('register.html', errors=errors)
+    return render_template("register.html", errors=errors)
 
-@app.route('/')
+
+# 🔹 หน้าแรก (ต้อง Login ก่อน)
+@app.route("/")
 def index():
-    if 'c_name' in session and 'c_sername' in session:
-        return render_template('index.html', name=session['c_name'], sername=session['c_sername'])
-    return redirect(url_for('login'))
+    if "c_name" in session and "c_sername" in session:
+        return render_template("index.html", name=session["c_name"], sername=session["c_sername"])
+    return redirect(url_for("login"))
 
-@app.route('/logout')
+
+# 🔹 Logout
+@app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-@app.route('/connectdb')
+
+# 🔹 Test Database Connection
+@app.route("/connectdb")
 def connectdb():
     conn = get_mysql_connection()
     if conn:
@@ -225,7 +204,9 @@ def connectdb():
         conn.close()
     else:
         flash("Failed to connect to the database.", "error")
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
-if __name__ == '__main__':
+
+# 🔹 Start Flask App
+if __name__ == "__main__":
     app.run(debug=True)
