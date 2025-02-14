@@ -30,7 +30,7 @@ def get_mysql_connection():
 
 
 # 🔹 ตรวจสอบการเชื่อมต่อฐานข้อมูล
-@app.route("/check_db")
+@app.route("/check_dbb")
 def check_db():
     try:
         db.session.execute(text("SELECT 1"))
@@ -39,17 +39,40 @@ def check_db():
         return f"Database Connection Failed: {str(e)}"
 
 
+
 # 🔹 หน้า Login ของ Admin
 @app.route("/adminlogin", methods=["GET", "POST"])
 def adminlogin():
+    print('Hi art')
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        hashed_password = hashlib.md5(password.encode()).hexdigest()
 
-        if username == "admin" and password == "password123":
-            return redirect(url_for("admin_dashboard"))
-        else:
-            flash("Invalid username or password.", "error")
+        conn = get_mysql_connection()
+        if conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT * FROM user WHERE u_id = %s AND p_id = %s", (username, hashed_password))
+                user = cursor.fetchone()
+
+                if user:
+                    print('GIBI')
+                    # session["c_id"] = user["c_id"]
+                    # session["c_name"] = user["c_name"]
+                    # session["c_sername"] = user["c_sername"]
+                    return redirect(url_for("index"))
+                else:
+                    flash("Invalid account ID or password.", "error")
+            except Error as err:
+                flash(f"Database error: {err}", "error")
+            finally:
+                cursor.close()
+                conn.close()
+        # if username == "admin" and password == "123":
+        #     return redirect(url_for("admin_dashboard"))
+        # else:
+        #     flash("Invalid username or password.", "error")
 
     return render_template("adminlogin.html")
 
@@ -64,7 +87,12 @@ def admin_dashboard():
 @app.route("/adminregister", methods=["GET", "POST"])
 def adminregister():
     errors = []
-
+    conn1 = get_mysql_connection()
+    cursor1 = conn1.cursor()
+    print('HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
+    print(cursor1.execute("SELECT * FROM user"))
+    print(cursor1.fetchall())
+    print('HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII')
     if request.method == "POST":
         u_id = request.form["username"]
         p_id = request.form["password"]
@@ -75,20 +103,25 @@ def adminregister():
             errors.append("Password is required")
 
         if not errors:
+            print("Tenlnwza")
             conn = get_mysql_connection()
             if conn:
+                print('Babe')
+                print(conn)
                 try:
                     cursor = conn.cursor()
 
                     # ตรวจสอบว่าผู้ใช้มีอยู่แล้วหรือไม่
-                    cursor.execute("SELECT * FROM reg_user WHERE u_id = %s", (u_id,))
+                    cursor.execute("SELECT * FROM user WHERE u_id = %s", (u_id,))
                     user = cursor.fetchone()
 
                     if user:
+                        print('Art')
                         errors.append("Username already exists")
                     else:
+                        print('Pet')
                         hashed_password = hashlib.md5(p_id.encode()).hexdigest()
-                        cursor.execute("INSERT INTO reg_user (u_id, p_id) VALUES (%s, %s)", (u_id, hashed_password))
+                        cursor.execute("INSERT INTO user (u_id, p_id) VALUES (%s, %s)", (u_id, hashed_password))
                         conn.commit()
 
                         session["username"] = u_id
@@ -96,6 +129,8 @@ def adminregister():
                         return redirect("/")
 
                 except pymysql.Error as e:
+                    print('ไอ้เย็ดแม่')
+                    print(conn)
                     errors.append(f"Database error: {e}")
                 finally:
                     cursor.close()
